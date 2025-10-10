@@ -1,0 +1,50 @@
+﻿<!doctype html>
+<html lang="en" data-bs-theme="auto">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirm your Email | www.botech.dev</title>
+    <link rel="canonical"
+          href="https://getbootstrap.com/docs/5.3/examples/sign-in/" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <meta name="theme-color" content="#712cf9" />
+    <link href="sign-in.css" rel="stylesheet" />
+
+</head>
+<body class="d-flex align-items-center py-4 bg-body-tertiary">
+    <main class="form-signin w-100 m-auto">
+
+        <img class="mb-4"
+             src="../assets/logos/BoTechLogoComplete.svg"
+             alt="" />
+        <div><h1 class="h3 mb-3 fw-normal" id="Welcome" /></div>
+
+        <p class="lead">
+            <small>
+                The Webpage will confirm your mail automatically. Please go to the excel add in and click next. When the confirmation does not work please click the retry Button below or the resend button in the add in.
+            </small>
+        </p>
+        <button class="btn btn-primary w-100 py-2" type="submit" id="RetryButton">
+            Retry
+        </button>
+        <p class="mt-5 mb-3 text-body-secondary">Copyright: www.botech.dev &copy; 2025 All Rights Reserved!</p>
+
+    </main>
+    <script>
+
+        function getUrlParameter(paramName) {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+            return urlParams.get(paramName);
+        }
+        document.getElementById("Welcome").textContent = "Hi " + getUrlParameter("UserName") + ","
+        document.getElementById("RetryButton").addEventListener('click', () => {
+            window.location.href = getUrlParameter("ConfirmLink");
+        });
+        // Execute the link
+        fetch(getUrlParameter("ConfirmLink"))
+
+    </script>
+</body>
+</html>

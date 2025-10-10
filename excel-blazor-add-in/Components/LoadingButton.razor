@@ -1,0 +1,65 @@
+﻿<MudButton Disabled="@Processing" OnClick="ProcessSomething" Variant="Variant.Filled" Color="Color.Primary">
+@if (Processing)
+{
+        <MudProgressCircular Class="ms-n1" 
+                             Size="Size.Small" 
+                             Indeterminate="@IsProgressIndeterminate"
+                             Min="@ProgressMin"
+                             Max="@ProgressMax"
+                             Value="@ProgressValue"/>
+        <MudText Class="ms-2">@LoadingText</MudText>
+}
+else
+{
+        <MudText>@Text</MudText>
+}
+</MudButton>
+
+@code {
+    /// <summary>
+    /// The text that will be displayed on the button when it is not processing.
+    /// </summary>
+    [Parameter]
+    public string Text { get; set; } = "Click me";
+    /// <summary>
+    /// The text that will be displayed when the button is processing.
+    /// </summary>
+    [Parameter]
+    public string LoadingText { get; set; } = "Processing";
+    /// <summary>
+    /// The Task that will be executed when the button is clicked.
+    /// </summary>
+    [Parameter]
+    public Func<LoadingButton, Task> TaskToProcess { get; set; }
+    /// <summary>
+    /// The minimum value of the progress bar.
+    /// </summary>
+    [Parameter]
+    public int ProgressMin { get; set; } = 0;
+    /// <summary>
+    /// The maximum value of the progress bar.
+    /// </summary>
+    [Parameter]
+    public int ProgressMax { get; set; } = 100;
+    /// <summary>
+    /// The current value of the progress bar.
+    /// </summary>
+    [Parameter]
+    public int ProgressValue { get; set; } = 0;
+    /// <summary>
+    /// Is the progress bar animated in indeterminate mode?
+    /// </summary>
+    [Parameter]
+    public bool IsProgressIndeterminate { get; set; } = true;
+    /// <summary>
+    /// Will be set to true when the task is processing. <br/>
+    /// <code>Important: <see cref="TaskToProcess"/> must set this value to false when finished.</code>
+    /// </summary>
+    public bool Processing { get; set; } = false;
+
+    async Task ProcessSomething()
+    {
+        Processing = true;
+        TaskToProcess.Invoke(this);
+    }
+}
