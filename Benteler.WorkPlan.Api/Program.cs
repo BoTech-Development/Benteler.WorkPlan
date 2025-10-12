@@ -55,6 +55,7 @@ var app = builder.Build();
 // Enable CORS
 app.UseCors("AllowBlazorDev");
 
+app.UseStaticFiles();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -71,7 +72,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
+
 
 app.Run();

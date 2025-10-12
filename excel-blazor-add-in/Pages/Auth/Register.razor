@@ -84,7 +84,7 @@
 		{
 			try
 			{
-				await client.AuthenticationClient.Register(EnteredEmail, EnteredPhone, EnteredPassword);
+				await client.AuthenticationClient.Register(EnteredEmail, EnteredPassword, EnteredPhone);
 				NavigationManager.NavigateTo($"/auth/verifyEmail?lastPage={LastPage}&email={EnteredEmail}", true);
 			}
 			catch (Exception ex)

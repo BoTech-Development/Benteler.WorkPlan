@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benteler.WorkPlan.Web", "ex
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D6AD7DE2-10EB-4336-9AC2-D299809BB37A}"
 	ProjectSection(SolutionItems) = preProject
+		ConfirmEmailTemplate.html = ConfirmEmailTemplate.html
+		..\..\..\..\..\..\..\Downloads\bootstrap-5.3.8-examples\bootstrap-5.3.8-examples\jumbotrons\jumbotrons.css = ..\..\..\..\..\..\..\Downloads\bootstrap-5.3.8-examples\bootstrap-5.3.8-examples\jumbotrons\jumbotrons.css
 		README.md = README.md
 	EndProjectSection
 EndProject

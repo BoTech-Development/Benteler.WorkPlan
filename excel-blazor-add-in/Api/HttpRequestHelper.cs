@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
+using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text;
 
 namespace Benteler.WorkPlan.Web.Api
 {
@@ -166,7 +168,11 @@ namespace Benteler.WorkPlan.Web.Api
                 try
                 {
                     Console.Write($"Performing Post request: {_baseUrl + url}");
-                    response = await client.PostAsJsonAsync(url, content);
+                    string json = JsonConvert.SerializeObject(content);
+                    StringContent jsonStringContent = new StringContent(json, Encoding.UTF8, "application/json");
+                    response = await client.PostAsync("/register", jsonStringContent);
+
+                    //response = await client.PostAsJsonAsync(url, content);
 
 
                     // Ensure the response is successful

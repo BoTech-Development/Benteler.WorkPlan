@@ -1,0 +1,40 @@
+﻿@page "/auth/verifyEmail"
+<MudStack>
+	<MudItem>
+		<MudText Typo="Typo.h4" Class="pa-4">Verify Email</MudText>
+	</MudItem>
+	<MudItem>
+		<MudPaper Class="pa-4">
+			<MudText Typo="Typo.body1">
+				An email has been sent to <b>@Email</b>. Please check your inbox and click the verification link to verify your email address.
+			</MudText>
+		</MudPaper>
+	</MudItem>
+	<MudItem>
+		<MudPaper Class="pa-4">
+			<MudButton Variant="Variant.Outlined"
+			           Color="Color.Secondary"
+			           FullWidth="true"
+			           >
+				Resend Email
+			</MudButton>
+			<MudButton Variant="Variant.Filled"
+			           Color="Color.Primary"
+			           FullWidth="true"
+			           >
+				Next
+			</MudButton>
+		</MudPaper>
+	</MudItem>
+</MudStack>
+
+@code {
+	[Inject]
+	public NavigationManager NavigationManager { get; set; } = default!;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "lastPage")]
+	public string? LastPage { get; set; }
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "email")]
+	public string? Email { get; set; }
+}

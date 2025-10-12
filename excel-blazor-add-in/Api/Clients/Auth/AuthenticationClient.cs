@@ -45,9 +45,7 @@ namespace Benteler.WorkPlan.Web.Api.Clients.Auth
         /// <exception cref="Exception">Thrown if the email verification message could not be sent.</exception>
         public async Task ResendEmailVerification(string email)
         {
-            RequestResult<dynamic> result = await _httpRequestHelper.HttpPost($"/confirmEmail", new StringContent(
-                $"{{\"email\":\"{email}\"}}",
-                System.Text.Encoding.UTF8, "application/json"));
+            RequestResult<dynamic> result = await _httpRequestHelper.HttpPostJson($"/resendConfirmationEmail", new ResendConfirmationEmailModel(email));
             if (!result.IsSuccess())
                 throw new Exception($"Could not send email verification. {result.Error?.Message}");
         }
@@ -74,6 +72,14 @@ namespace Benteler.WorkPlan.Web.Api.Clients.Auth
             {
                 this.email = email;
                 this.password = password;
+            }
+        }
+        private class ResendConfirmationEmailModel
+        {
+            public string email { get; set; }
+            public ResendConfirmationEmailModel(string email)
+            {
+                this.email = email;
             }
         }
     }
