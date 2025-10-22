@@ -20,7 +20,7 @@ namespace Benteler.WorkPlan.Web.Api
             AuthenticationClient = new AuthenticationClient(httpRequestHelper);
             VerificationClient = new VerificationClient(httpRequestHelper);
         }
-        public static async Task<ApiClient> GetInstance()
+        public static async Task<ApiClient?> GetInstance()
         {
             if (_instance == null) Error = await ApiClient.CreateApiClientFor("https://localhost:7236");
             return _instance;
@@ -33,6 +33,7 @@ namespace Benteler.WorkPlan.Web.Api
         public static async Task<HttpResponseMessage?>  CreateApiClientFor(string baseUrl)
         {
             HttpRequestHelper requestHelper = new HttpRequestHelper(baseUrl);
+            requestHelper.Token = new WorkPlan.Api.SharedModels.Authentication.Result.LoginToken();
             RequestResult<bool> result = await TryToConnectToNewApi(requestHelper);
             if(result.IsSuccess())
                 _instance = new ApiClient(requestHelper);

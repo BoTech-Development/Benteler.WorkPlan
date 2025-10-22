@@ -1,6 +1,11 @@
-﻿@using Benteler.WorkPlan.Web.Api
+﻿@using Benteler.WorkPlan.Api.SharedModels.Authentication.Result
+@using Benteler.WorkPlan.Web.Api
+@using Benteler.WorkPlan.Web.Components
+@using BitzArt.Blazor.Cookies
 @page "/auth/login"
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject ICookieService CookieService
 <MudStack>
 	<MudItem>
 		<MudText Typo="Typo.h4" Class="pa-4">Login</MudText>
@@ -19,6 +24,18 @@
 						  Required="true"
 						  FullWidth="true"
 						  @bind-Value="Password"/>
+            <MudText Typo="Typo.caption" 
+					Class="mt-2"
+					 hidden="@isTowFactorCodeBoxVisisble">
+					Please check your Authenticator app.
+				</MudText>
+			<MudTextField T="string"
+						  Label="Code"
+						  Variant="Variant.Outlined"
+						  Required="true"
+						  FullWidth="true"
+						  hidden="@isTowFactorCodeBoxVisisble"
+						  @bind-Value="Code" />
 		</MudPaper>
 	</MudItem>
 	<MudItem>
@@ -29,38 +46,156 @@
 					   >
 				Cancel
 			</MudButton>
-			<MudButton Variant="Variant.Filled"
-					   Color="Color.Primary"
-					   FullWidth="true"
-					   OnClick="@OnLoginClicked">
-				Login
-			</MudButton>
+			<LoadingButton Text="Login"
+						   LoadingText="Logging in..."
+						   TaskToProcess="OnLoginClicked" />
 		</MudPaper>
 	</MudItem>
 </MudStack>
-
+<ErrorDialog ErrorMessage="@ErrorMessage" IsErrorDialogOpen="@IsErrorDialogOpen"/>
 @code {
+
 	[Parameter]
 	[SupplyParameterFromQuery(Name = "lastPage")]
 	public string? LastPage { get; set; }
 
 	public string Password { get; set; }
 	public string Email { get; set; }
+	public string Code { get; set; }
 
-	public async Task OnLoginClicked()
+	public bool isTowFactorCodeBoxVisisble = false;
+	public string ErrorMessage { get; set; }
+	public bool IsErrorDialogOpen { get; set; } = false;
+	/// <summary>
+	/// When there is already a valid login token in the cookies, the user will be redirected to the last page.
+	/// </summary>
+	protected override void OnInitialized()
+	{
+		TryToValidateOldToken();
+	}
+
+	private async Task TryToValidateOldToken()
+	{
+		ApiClient? client = null;
+		if ((client = await ApiClient.GetInstance()) != null)
+		{
+			LoginToken? token = await client.AuthenticationClient.GetLoginTokenFromCookies(CookieService);
+			if (token != null)
+			{
+				client.AuthenticationClient.SaveLoginTokenToHttpRequestHelper(token); // Set the token to the HttpRequestHelper for the request header
+				ValidateToken(token);
+			}
+		}
+	}
+
+	private async Task<bool> ValidateToken(LoginToken token)
 	{
 		ApiClient? client = null;
 		if ((client = await ApiClient.GetInstance()) != null)
 		{
 			try
 			{
-				await client.AuthenticationClient.Login(Email, Password);
-				NavigationManager.NavigateTo(LastPage);
+				LoginToken? newToken = await client.AuthenticationClient.RefreshToken(token);
+				if (newToken != null)
+				{
+					client.AuthenticationClient.SaveLoginTokenToCookies(CookieService, newToken); // Save the token.
+					//SaveCookies(newToken); // Save the token in cookies.
+
+					NavigationManager.NavigateTo(LastPage);
+					return true;
+				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
+				ErrorMessage = ex.ToString();
+				IsErrorDialogOpen = true;
+				Console.WriteLine(ex.Message);
+			}
+		}
+
+		return false;
+	}
+	public async Task OnLoginClicked(LoadingButton button)
+	{
+		ApiClient? client = null;
+		if ((client = await ApiClient.GetInstance()) != null)
+		{
+			try
+			{
+				await TryToLogin(client);
+			}
+			catch (Exception ex)
+			{
+				button.Processing = false;
+				if (ex is ArgumentException)
+				{
+					if (ex.Message.Contains("Two factor authentication is enabled. Please provide the 2fa code."))
+						isTowFactorCodeBoxVisisble = true; // User need to provide the 2fa code.
+				}
+
+				ErrorMessage = ex.ToString();
+				IsErrorDialogOpen = true;
 				Console.WriteLine(ex.Message);
 			}
 		}
 	}
+	private async Task TryToLogin(ApiClient client)
+	{
+		Console.WriteLine($"Trying to login... \n with the following params: Email: {Email} Password: {Password} Code: {Code}");
+		LoginToken? token = await client.AuthenticationClient.Login(Email, Password, Code, "");
+		if (token != null)
+		{
+			Console.WriteLine($"The Token is {token.AccessToken}");
+			// Save the token to runtime and cookies.
+			client.AuthenticationClient.SaveLoginTokenToCookies(CookieService, token); 
+			client.AuthenticationClient.SaveLoginTokenToHttpRequestHelper(token); 														   
+			// Force every user to setup 2fa if not done yet
+			await ValidateTwoFactorStatus(client);
+		}
+	}
+	private async Task ValidateTwoFactorStatus(ApiClient client)
+	{
+		Console.WriteLine("Checking if 2fa is enabled...");
+		if (!await client.AuthenticationClient.IsTwoFactorEnabled(Email))
+		{
+			Console.WriteLine("Move to " + $"/auth/enable2fa?lastPage={LastPage}&email={Email}");
+			NavigationManager.NavigateTo($"/auth/enable2fa?lastPage={LastPage}&email={Email}", forceLoad: true);
+		}
+		else
+		{
+			if (LastPage == null)
+			{
+				LastPage = "/";
+			}
+			Console.WriteLine("Move to " + LastPage);
+			NavigationManager.NavigateTo(LastPage, forceLoad: true);
+		}
+	}
+
+/*	private async Task<LoginToken?> TryToLoadLoginTokenFromCookies()
+	{
+		LoginToken token = new LoginToken();
+		Cookie? accessTokenCookie = await CookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.AccessToken");
+		Cookie? refreshTokenCookie = await CookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.AccessToken");
+		Cookie? tokenTypeCookie = await CookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.AccessToken");
+		Cookie? expiresInCookie = await CookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.AccessToken");
+		if (accessTokenCookie != null && refreshTokenCookie != null && tokenTypeCookie != null && expiresInCookie != null)
+		{
+			token.AccessToken = accessTokenCookie.Value;
+			token.RefreshToken = refreshTokenCookie.Value;
+			token.TokenType = tokenTypeCookie.Value;
+			token.ExpiresIn = int.Parse(expiresInCookie.Value);
+			return token;
+		}
+		return null;
+	}
+	private void SaveCookies(LoginToken token)
+	{
+		Console.Write($"Saving token to cookies... ");
+		CookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.AccessToken", token.AccessToken, DateTimeOffset.Now.AddMinutes(30)));
+		CookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.RefreshToken", token.RefreshToken, DateTimeOffset.Now.AddMinutes(30)));
+		CookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.TokenType", token.TokenType, DateTimeOffset.Now.AddMinutes(30)));
+		CookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.ExpiresIn", token.ExpiresIn.ToString(), DateTimeOffset.Now.AddMinutes(30)));
+		Console.WriteLine($"Saved!");
+		}*/
 }

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Benteler.WorkPlan.Api.Controllers.Auth
 {
-    [Route("[controller]")]
+    [Route("auth/[controller]")]
     [ApiController]
     public class VerificationController : ControllerBase
     {

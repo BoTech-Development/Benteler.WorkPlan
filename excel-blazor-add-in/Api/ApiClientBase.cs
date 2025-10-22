@@ -1,4 +1,7 @@
-﻿namespace Benteler.WorkPlan.Web.Api
+﻿using Benteler.WorkPlan.Api.SharedModels.Authentication.Result;
+using BitzArt.Blazor.Cookies;
+
+namespace Benteler.WorkPlan.Web.Api
 {
     public class ApiClientBase
     {
@@ -7,5 +10,6 @@
         {
             _httpRequestHelper = requestHelper;
         }
+       
     }
 }

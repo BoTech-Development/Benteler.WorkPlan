@@ -49,19 +49,8 @@
 	</MudItem>
 </MudStack>
 
-<MudDialog @bind-Visible="isErrorDialogOpen" Style="height: 400px">
-	<TitleContent>
-		<MudText Typo="Typo.h6">
-			<MudIcon Icon="@Icons.Material.Filled.Error" Class="mr-3" Color="Color.Error" /> An error has occurred during the request!
-		</MudText>
-	</TitleContent>
-	<DialogContent>
-		@ErrorMessage
-	</DialogContent>
-	<DialogActions>
-		<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CloseErrorDialog" Class="px-10">Close</MudButton>
-	</DialogActions>
-</MudDialog>
+<ErrorDialog ErrorMessage="@ErrorMessage" 
+             IsErrorDialogOpen="@IsErrorDialogOpen"/>
 
 @code {
 	[Inject]
@@ -70,8 +59,8 @@
 	[SupplyParameterFromQuery(Name = "lastPage")]
 	public string? LastPage { get; set; } 
 
-	public bool isErrorDialogOpen = false;
-	public string ErrorMessage { get; set; } = string.Empty;
+	private bool IsErrorDialogOpen = false;
+	private string ErrorMessage { get; set; } = string.Empty;
 
 	public string EnteredPassword { get; set; }
 	public string EnteredEmail { get; set; }
@@ -91,11 +80,11 @@
 			{
 				Console.WriteLine(ex.Message);
 				ErrorMessage = ex.ToString();
-				isErrorDialogOpen = true;
+				IsErrorDialogOpen = true;
 			}
 		}
 		button.Processing = false;
 		this.StateHasChanged();
 	}	
-	private void CloseErrorDialog() { isErrorDialogOpen = false; }
+	
 }
