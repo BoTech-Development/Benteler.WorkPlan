@@ -1,4 +1,11 @@
-﻿<MudButton Disabled="@Processing" OnClick="ProcessSomething" Variant="Variant.Filled" Color="Color.Primary">
+﻿<MudButton Disabled="@Processing" OnClick="ProcessSomething" 
+           Variant="@ButtonVariant" 
+           Color="@ButtonColor"
+           StartIcon="@StartIcon"
+           EndIcon="@EndIcon"
+           IconColor="@IconColor"
+           Size="@ButtonSize"
+           FullWidth="@FullWidth">
 @if (Processing)
 {
         <MudProgressCircular Class="ms-n1" 
@@ -15,7 +22,7 @@ else
 }
 </MudButton>
 
-@code {
+    @code {
     /// <summary>
     /// The text that will be displayed on the button when it is not processing.
     /// </summary>
@@ -56,6 +63,22 @@ else
     /// <code>Important: <see cref="TaskToProcess"/> must set this value to false when finished.</code>
     /// </summary>
     public bool Processing { get; set; } = false;
+
+    // Button Params
+    [Parameter]
+    public Variant ButtonVariant { get; set; } = Variant.Filled;
+    [Parameter]
+    public Color ButtonColor { get; set; } = Color.Primary;
+    [Parameter]
+	public string StartIcon { get; set; } = string.Empty;
+    [Parameter]
+    public string EndIcon { get; set; } = string.Empty;
+    [Parameter]
+    public Color IconColor { get; set; } = Color.Primary;
+    [Parameter]
+    public Size ButtonSize { get; set; } = Size.Medium;
+    [Parameter]
+    public bool FullWidth { get; set; } = false;
 
     async Task ProcessSomething()
     {

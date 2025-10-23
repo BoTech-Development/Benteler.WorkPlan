@@ -6,52 +6,65 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject ICookieService CookieService
-<MudStack>
-	<MudItem>
-		<MudText Typo="Typo.h4" Class="pa-4">Login</MudText>
-	</MudItem>
-	<MudItem>
-		<MudPaper Class="pa-4">
-			<MudTextField T="string"
-						  Label="Email"
-						  Variant="Variant.Outlined"
-						  Required="true"
-						  FullWidth="true" 
-						  @bind-Value="Email"/>
-			<MudTextField T="string"
-						  Label="Password"
-						  Variant="Variant.Outlined"
-						  Required="true"
-						  FullWidth="true"
-						  @bind-Value="Password"/>
-            <MudText Typo="Typo.caption" 
-					Class="mt-2"
-					 hidden="@isTowFactorCodeBoxVisisble">
+
+@if (validatingOldToken)
+{
+	<MudStack Row="true">
+		<MudProgressCircular Size="Size.Small"
+							 Indeterminate="true" />
+		<MudText>Validating (refreshing) old token...</MudText>
+	</MudStack>
+}
+else
+{
+	<MudStack>
+		<MudItem>
+			<MudText Typo="Typo.h4" Class="pa-4">Login</MudText>
+		</MudItem>
+		<MudItem>
+			<MudPaper Class="pa-4">
+				<MudTextField T="string"
+				Label="Email"
+				Variant="Variant.Outlined"
+				Required="true"
+				FullWidth="true" 
+				@bind-Value="Email"/>
+				<MudTextField T="string"
+				Label="Password"
+				Variant="Variant.Outlined"
+				Required="true"
+				FullWidth="true"
+				@bind-Value="Password"/>
+				<MudText Typo="Typo.caption" 
+				Class="mt-2"
+				hidden="@isTowFactorCodeBoxVisisble">
 					Please check your Authenticator app.
 				</MudText>
-			<MudTextField T="string"
-						  Label="Code"
-						  Variant="Variant.Outlined"
-						  Required="true"
-						  FullWidth="true"
-						  hidden="@isTowFactorCodeBoxVisisble"
-						  @bind-Value="Code" />
-		</MudPaper>
-	</MudItem>
-	<MudItem>
-		<MudPaper Class="pa-4">
-			<MudButton Variant="Variant.Outlined"
-					   Color="Color.Secondary"
-					   FullWidth="true"
-					   >
-				Cancel
-			</MudButton>
-			<LoadingButton Text="Login"
-						   LoadingText="Logging in..."
-						   TaskToProcess="OnLoginClicked" />
-		</MudPaper>
-	</MudItem>
-</MudStack>
+				<MudTextField T="string"
+				Label="Code"
+				Variant="Variant.Outlined"
+				Required="true"
+				FullWidth="true"
+				hidden="@isTowFactorCodeBoxVisisble"
+				@bind-Value="Code" />
+			</MudPaper>
+		</MudItem>
+		<MudItem>
+			<MudStack Row="true">
+				<MudButton Variant="Variant.Outlined"
+				Color="Color.Secondary"
+				FullWidth="true"
+				>
+					Cancel
+				</MudButton>
+				<LoadingButton FullWidth="true"
+				Text="Login"
+				LoadingText="Logging in..."
+				TaskToProcess="OnLoginClicked" />
+			</MudStack>
+		</MudItem>
+	</MudStack>
+}
 <ErrorDialog ErrorMessage="@ErrorMessage" IsErrorDialogOpen="@IsErrorDialogOpen"/>
 @code {
 
@@ -66,6 +79,9 @@
 	public bool isTowFactorCodeBoxVisisble = false;
 	public string ErrorMessage { get; set; }
 	public bool IsErrorDialogOpen { get; set; } = false;
+
+	public bool validatingOldToken { get; set; } = true;
+
 	/// <summary>
 	/// When there is already a valid login token in the cookies, the user will be redirected to the last page.
 	/// </summary>
@@ -79,13 +95,18 @@
 		ApiClient? client = null;
 		if ((client = await ApiClient.GetInstance()) != null)
 		{
+			Console.WriteLine("Trying to validate/refresh token.");
 			LoginToken? token = await client.AuthenticationClient.GetLoginTokenFromCookies(CookieService);
 			if (token != null)
 			{
+				Console.WriteLine("Loaded Token from cookies.");
 				client.AuthenticationClient.SaveLoginTokenToHttpRequestHelper(token); // Set the token to the HttpRequestHelper for the request header
-				ValidateToken(token);
+				await ValidateToken(token);
 			}
 		}
+		Console.WriteLine($"State has changed!");
+		validatingOldToken = false;
+		this.StateHasChanged();
 	}
 
 	private async Task<bool> ValidateToken(LoginToken token)
@@ -95,13 +116,20 @@
 		{
 			try
 			{
+				Console.WriteLine("Trying to refresh the old token...");
 				LoginToken? newToken = await client.AuthenticationClient.RefreshToken(token);
 				if (newToken != null)
 				{
-					client.AuthenticationClient.SaveLoginTokenToCookies(CookieService, newToken); // Save the token.
-					//SaveCookies(newToken); // Save the token in cookies.
 
-					NavigationManager.NavigateTo(LastPage);
+					Console.WriteLine("Success!\n Saving cookie...");
+					await client.AuthenticationClient.SaveLoginTokenToCookies(CookieService, newToken); // Save the token.
+					//SaveCookies(newToken); // Save the token in cookies.
+					if(LastPage == null)
+					{
+						LastPage = "/";
+					}
+					Console.WriteLine($"Redirecting to: {LastPage}");
+					NavigationManager.NavigateTo(LastPage, true);
 					return true;
 				}
 			}
@@ -147,7 +175,7 @@
 		{
 			Console.WriteLine($"The Token is {token.AccessToken}");
 			// Save the token to runtime and cookies.
-			client.AuthenticationClient.SaveLoginTokenToCookies(CookieService, token); 
+			await client.AuthenticationClient.SaveLoginTokenToCookies(CookieService, token); 
 			client.AuthenticationClient.SaveLoginTokenToHttpRequestHelper(token); 														   
 			// Force every user to setup 2fa if not done yet
 			await ValidateTwoFactorStatus(client);

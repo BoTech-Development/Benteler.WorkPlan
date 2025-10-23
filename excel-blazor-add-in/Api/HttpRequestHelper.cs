@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Benteler.WorkPlan.Web.Api
 {
@@ -17,29 +18,29 @@ namespace Benteler.WorkPlan.Web.Api
         {
             _baseUrl = baseUrl;
         }
-        public void SaveTokenCookies(ICookieService cookieService , LoginToken token)
+        public async Task SaveTokenCookies(ICookieService cookieService , LoginToken token)
         {
             Console.Write($"Saving token to cookies... ");
-            cookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.AccessToken", token.AccessToken, DateTimeOffset.Now.AddMinutes(30)));
-            cookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.RefreshToken", token.RefreshToken, DateTimeOffset.Now.AddMinutes(30)));
-            cookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.TokenType", token.TokenType, DateTimeOffset.Now.AddMinutes(30)));
-            cookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.ExpiresIn", token.ExpiresIn.ToString(), DateTimeOffset.Now.AddMinutes(30)));
+            await cookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.AccessToken", token.AccessToken, DateTimeOffset.Now.AddMinutes(30)));
+            await cookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.RefreshToken", token.RefreshToken, DateTimeOffset.Now.AddMinutes(30)));
+            await cookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.TokenType", token.TokenType, DateTimeOffset.Now.AddMinutes(30)));
+            await cookieService.SetAsync(new Cookie("Benteler.WorkPlan.Auth.Cookie.ExpiresIn", token.ExpiresIn.ToString(), DateTimeOffset.Now.AddMinutes(30)));
             Console.WriteLine($"Saved!");
         }
         public async Task<LoginToken?> LoadTokenCookies(ICookieService cookieService)
         {
          
-            Console.Write($"Saving token to cookies... ");
-            Cookie accessTokenCookie = await cookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.AccessToken");
-            Cookie refreshTokenCookie = await cookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.RefreshToken");
-            Cookie tokenTypeCookie = await cookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.TokenType");
-            Cookie expiresInCookie = await cookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.ExpiresIn");
-            Console.WriteLine($"Saved!");
-            if(accessTokenCookie.Value != string.Empty && 
-                refreshTokenCookie.Value != string.Empty &&
-                tokenTypeCookie.Value != string.Empty &&
-                expiresInCookie.Value != string.Empty)
+            Console.Write($"Loading LoginToken from Cookies... ");
+            Cookie? accessTokenCookie = await cookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.AccessToken");
+            Cookie? refreshTokenCookie = await cookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.RefreshToken");
+            Cookie? tokenTypeCookie = await cookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.TokenType");
+            Cookie? expiresInCookie = await cookieService.GetAsync("Benteler.WorkPlan.Auth.Cookie.ExpiresIn");
+            if(accessTokenCookie != null && 
+                refreshTokenCookie != null &&
+                tokenTypeCookie != null &&
+                expiresInCookie != null)
             {
+                Console.WriteLine($"Loaded!");
                 return new LoginToken()
                 {
                     AccessToken = accessTokenCookie.Value,
@@ -50,6 +51,7 @@ namespace Benteler.WorkPlan.Web.Api
             }
             else
             {
+                Console.WriteLine($"Error!");
                 return null;
             }
         }

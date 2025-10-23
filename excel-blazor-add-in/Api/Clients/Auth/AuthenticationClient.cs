@@ -25,11 +25,11 @@ namespace Benteler.WorkPlan.Web.Api.Clients.Auth
         /// </summary>
         /// <param name="cookieService">The service used to manage browser cookies for storing the login token. Cannot be null.</param>
         /// <param name="token">The login token to be saved to cookies. Cannot be null.</param>
-        public void SaveLoginTokenToCookies(ICookieService cookieService, LoginToken token)
+        public async Task SaveLoginTokenToCookies(ICookieService cookieService, LoginToken token)
         {
             //_httpRequestHelper.Token = token;
             //Console.WriteLine("Set Token to: "  + _httpRequestHelper.Token.AccessToken);
-            _httpRequestHelper.SaveTokenCookies(cookieService, token);
+            await _httpRequestHelper.SaveTokenCookies(cookieService, token);
         }
         /// <summary>
         /// Retrieves the login token from cookies using the specified cookie service.
