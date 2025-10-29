@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.2" />
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>0311ee48-4ae0-4d90-88ce-068a5179a4ac</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="9.5.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Benteler.WorkPlan.Api\Benteler.WorkPlan.Api.csproj" />
+    <ProjectReference Include="..\Benteler.WorkPlan.Web\Benteler.WorkPlan.Web\Benteler.WorkPlan.Web.csproj" />
+  </ItemGroup>
+
+</Project>

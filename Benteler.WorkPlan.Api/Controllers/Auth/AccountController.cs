@@ -1,6 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Benteler.WorkPlan.Api.Data;
 using Benteler.WorkPlan.Api.SharedModels.Authentication;
 using Benteler.WorkPlan.Api.SharedModels.Authentication.Dto;
 using Benteler.WorkPlan.Api.SharedModels.Authentication.Result;
@@ -19,12 +20,30 @@ namespace Benteler.WorkPlan.Api.Controllers.Auth
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _config;
+		private readonly DataContext _dataContext;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration config)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration config, DataContext dataContext)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _config = config;
+			_dataContext = dataContext;
+        }
+		
+		[HttpDelete("DeleteAccount")]
+		public async Task<IActionResult> DeleteAccount([FromBody] string email)
+		{
+			User? user = await _userManager.FindByEmailAsync(email);
+			if(user != null) 
+			{ 
+				var result = await _userManager.DeleteAsync(user);
+				if (result.Succeeded)
+				{
+					return Ok("User deleted successfully");
+				}
+				return BadRequest(result.Errors);
+            }
+            return NotFound("User with email: " + email + " not found");
         }
 		/*
 		[HttpPost("Logout")]

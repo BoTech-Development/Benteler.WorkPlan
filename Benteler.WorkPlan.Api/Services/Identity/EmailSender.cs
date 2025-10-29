@@ -51,21 +51,21 @@ public class EmailSender : IEmailSender<User>
 
     private void SendMail(string to, string subject, string body)
     {
-        File.Create("C:\\Users\\Florian\\OneDrive\\Dokumente\\Jobs\\Benteler\\Code\\BoTech-Development\\mail.txt")
+      /*  File.Create("C:\\Users\\Florian\\OneDrive\\Dokumente\\Jobs\\Benteler\\Code\\BoTech-Development\\mail.txt")
             .Dispose();
         File.WriteAllText("C:\\Users\\Florian\\OneDrive\\Dokumente\\Jobs\\Benteler\\Code\\BoTech-Development\\mail.txt",
-            to + "\n" + subject + "\n" + body + "\n");
-        /*
+            to + "\n" + subject + "\n" + body + "\n");*/
+        
         try
         {
-            // SMTP server configuration
-            string smtpServer = "smtp.ionos.de"; // IONOS SMTP server
-            int smtpPort = 587; // Port for STARTTLS
-            string emailFrom = "server@botech.dev"; // Your IONOS email address
-            string emailPassword = "dfsgkjlbeafwouih4384PAJKLEdsgywrt354!§$"; // Your IONOS email password
+			// SMTP server configuration
+			string smtpServer = "mail.botech.dev"; //"smtp.ionos.de"; // IONOS SMTP server
+			int smtpPort = 587; //465; //587; // Port for STARTTLS
+			string emailFrom = "noreply@botech.dev"; // Your IONOS email address
+			string emailPassword = "hv8qwu4pcqu039vp92uxn0"; // Your IONOS email password
 
-            // Create the MailMessage object
-            MailMessage mail = new MailMessage();
+			// Create the MailMessage object
+			MailMessage mail = new MailMessage();
             mail.From = new MailAddress(emailFrom);
             mail.To.Add(to);
             mail.Subject = subject;
@@ -86,6 +86,6 @@ public class EmailSender : IEmailSender<User>
         {
             // Handle errors
             Console.WriteLine("Error sending email: " + ex.Message);
-        }*/
+        }
     }
 }

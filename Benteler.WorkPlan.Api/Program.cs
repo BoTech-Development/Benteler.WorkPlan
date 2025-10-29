@@ -79,18 +79,38 @@ builder.Services.AddAuthentication(options =>
 */
 
 // Allow the blazor add in connect to the Api
-builder.Services.AddCors(options =>
+/*builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowBlazorDev", policy =>
-      policy.WithOrigins("https://localhost:7287") // your Blazor app URL
-            .AllowAnyHeader()
+      policy.WithOrigins("https://localhost:7178") // your Blazor app URL old:  https://localhost:7287 60313
+			.AllowAnyHeader()
             .AllowAnyMethod());
-});
+});*/
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("LocalhostPolicy", policy =>
+    {
+        //policy.AllowAnyOrigin().AllowCredentials().AllowAnyMethod();
+        policy.SetIsOriginAllowed(origin =>
+        {
+            // Allow any localhost origin regardless of port
+            if (Uri.TryCreate(origin, UriKind.Absolute, out var uri))
+            {
+                return uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase);
+            }
+
+			return false;
+        })
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 // Enable CORS
-app.UseCors("AllowBlazorDev");
+//app.UseCors("AllowBlazorDev");
+app.UseCors("LocalhostPolicy");
 
 app.UseStaticFiles();
 
