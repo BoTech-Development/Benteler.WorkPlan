@@ -1,0 +1,90 @@
+﻿@using Benteler.WorkPlan.Web.Api
+@using Benteler.WorkPlan.Web.Components
+@page "/auth/register"
+<MudStack>
+	<MudItem>
+		<MudText Typo="Typo.h4" Class="pa-4">Register</MudText>
+	</MudItem>
+	<MudItem>
+		<MudPaper Class="pa-4">
+			<MudTextField T="string"
+						  Label="Email"
+						  Variant="Variant.Outlined"
+						  Required="true"
+						  FullWidth="true" 
+						  @bind-Value="EnteredEmail"/>
+			<MudTextField T="string"
+						  Label="Phone"
+						  Variant="Variant.Outlined"
+						  Required="true"
+						  FullWidth="true"
+						  @bind-Value="EnteredPhone"/>
+			<MudTextField T="string"
+						  Label="Password"
+						  Variant="Variant.Outlined"
+						  Required="true"
+						  FullWidth="true" 
+						  @bind-Value="EnteredPassword"/>
+		</MudPaper>
+	</MudItem>
+	<MudItem>
+		<MudPaper Class="pa-4">
+			<LoadingButton Text="Register"
+						   LoadingText="Registering..."
+						   TaskToProcess="OnRegisterClicked" />
+						   <!--
+			<MudButton Variant="Variant.Filled" 
+					   Color="Color.Primary" 
+					   FullWidth="true"
+					   OnClick="@OnRegisterClicked">
+					   Register
+			</MudButton>-->
+			<MudButton Variant="Variant.Outlined" 
+					   Color="Color.Secondary" 
+					   FullWidth="true"
+						Href="@LastPage">
+					   Cancel
+			</MudButton>
+		</MudPaper>
+	</MudItem>
+</MudStack>
+
+<ErrorDialog ErrorMessage="@ErrorMessage" 
+             IsErrorDialogOpen="@IsErrorDialogOpen"/>
+
+@code {
+	[Inject]
+	public NavigationManager NavigationManager { get; set; } = default!;
+	[Parameter]
+	[SupplyParameterFromQuery(Name = "lastPage")]
+	public string? LastPage { get; set; } 
+
+	private bool IsErrorDialogOpen = false;
+	private string ErrorMessage { get; set; } = string.Empty;
+
+	public string EnteredPassword { get; set; }
+	public string EnteredEmail { get; set; }
+	public string EnteredPhone { get; set; }
+
+	public async Task OnRegisterClicked(LoadingButton button)
+	{
+		ApiClient? client = null;
+		if ((client = await ApiClient.GetInstance()) != null)
+		{
+			try
+			{
+				await client.AuthenticationClient.Register(EnteredEmail, EnteredPassword, EnteredPhone);
+				NavigationManager.NavigateTo($"/auth/verifyEmail?lastPage={LastPage}&email={EnteredEmail}", true);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				ErrorMessage = ex.ToString();
+				IsErrorDialogOpen = true;
+			}
+		}
+		button.Processing = false;
+		this.StateHasChanged();
+	}	
+	
+}

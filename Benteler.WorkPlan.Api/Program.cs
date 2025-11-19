@@ -1,6 +1,6 @@
 using Benteler.WorkPlan.Api.Data;
+using Benteler.WorkPlan.Api.Models.Auth;
 using Benteler.WorkPlan.Api.Services.Identity;
-using Benteler.WorkPlan.Api.SharedModels.Authentication;
 using Microsoft.AspNetCore.Authentication.BearerToken;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +44,8 @@ builder.Services.AddIdentityApiEndpoints<User>(options =>
         //options.Tokens.AuthenticatorTokenProvider = TokenOptions.DefaultAuthenticatorProvider;
 
     })
-    .AddEntityFrameworkStores<DataContext>();
+	.AddRoles<Role>()
+	.AddEntityFrameworkStores<DataContext>();
 //.AddDefaultTokenProviders();
 // Set the Bearer Token timout to 30 minutes
 builder.Services.AddOptions<BearerTokenOptions>(IdentityConstants.BearerScheme)

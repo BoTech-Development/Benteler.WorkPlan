@@ -1,0 +1,54 @@
+﻿@page "/"
+@using Benteler.WorkPlan.Api.SharedModels.Authentication.Result
+@using Benteler.WorkPlan.Web.Api
+@using BitzArt.Blazor.Cookies
+@inject ICookieService CookieService
+
+<PageTitle>Hello World</PageTitle>
+
+<MudStack Row="true">
+    <MudButton StartIcon="@Icons.Material.Filled.Work">Work</MudButton>
+    <MudButton StartIcon="@Icons.Material.Filled.PauseCircle">Break</MudButton>
+    <MudButton StartIcon="@Icons.Material.Filled.Home">Go Home</MudButton>
+</MudStack>
+
+
+@code{
+	/// <summary>
+	/// When there is already a valid login token in the cookies, the user will be redirected to the last page.
+	/// </summary>
+
+	protected override void OnInitialized()
+	{
+
+	}
+	private async Task ValidateUserLogin()
+	{
+
+	}
+	private async Task<bool> TryToLoadLoginTokenFromCookies()
+	{
+		Console.WriteLine("Trying to load token from cookies.");
+		ApiClient? client = null;
+		if ((client = await ApiClient.GetInstance()) != null)
+		{
+			Console.WriteLine("Trying to validate/refresh token.");
+			LoginToken? token = await client.AuthenticationClient.GetLoginTokenFromCookies(CookieService);
+			if(token != null)
+			{
+				client.AuthenticationClient.SaveLoginTokenToHttpRequestHelper(token);
+				return true;
+			}
+		}
+		return false;
+	}
+	private async Task<bool> IsUserAuthorized()
+	{
+		ApiClient? client = null;
+		if ((client = await ApiClient.GetInstance()) != null)
+		{
+			client.AuthenticationClient.GetAuthorizationInfo();
+		}
+		return false;
+	}
+}

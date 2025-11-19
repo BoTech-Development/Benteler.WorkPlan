@@ -1,15 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Benteler.WorkPlan.Api.Data;
-using Benteler.WorkPlan.Api.SharedModels.Authentication;
-using Benteler.WorkPlan.Api.SharedModels.Authentication.Dto;
+﻿using Benteler.WorkPlan.Api.Data;
+using Benteler.WorkPlan.Api.Models.Auth;
 using Benteler.WorkPlan.Api.SharedModels.Authentication.Result;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
+
 
 namespace Benteler.WorkPlan.Api.Controllers.Auth
 {
@@ -29,9 +24,15 @@ namespace Benteler.WorkPlan.Api.Controllers.Auth
             _config = config;
 			_dataContext = dataContext;
         }
-		
+		/// <summary>
+		/// Deletes the user account associated with the specified email address.
+		/// </summary>
+		/// <param name="email">The email address of the user account to delete. Cannot be null or empty.</param>
+		/// <returns>An <see cref="IActionResult"/> indicating the result of the delete operation. Returns <see cref="OkResult"/> if
+		/// the user was deleted successfully, <see cref="BadRequestObjectResult"/> if the deletion failed, or <see
+		/// cref="NotFoundObjectResult"/> if no user with the specified email exists.</returns>
 		[HttpDelete("DeleteAccount")]
-		public async Task<IActionResult> DeleteAccount([FromBody] string email)
+		public async Task<IActionResult> DeleteAccount([FromQuery] string email)
 		{
 			User? user = await _userManager.FindByEmailAsync(email);
 			if(user != null) 
@@ -44,6 +45,35 @@ namespace Benteler.WorkPlan.Api.Controllers.Auth
 				return BadRequest(result.Errors);
             }
             return NotFound("User with email: " + email + " not found");
+        }
+		/// <summary>
+		/// Retrieves authorization information for a user identified by their email address, including user ID, email, and
+		/// assigned roles.
+		/// </summary>
+		/// <param name="email">The email address of the user whose authorization information is to be retrieved. Cannot be null or empty.</param>
+		/// <returns>An HTTP 200 response containing the user's authorization information if the user is found; otherwise, an HTTP 404
+		/// response if no user with the specified email exists.</returns>
+		[Authorize]
+		[HttpGet("GetAuthorizationInfo")]
+		public async Task<IActionResult> GetAuthorizationInfo() //[FromQuery]string email)
+		{
+			
+			if(_signInManager.Context.User.Identity != null && _signInManager.Context.User.Identity.Name != null)
+			{
+				User? user = await _userManager.FindByNameAsync(_signInManager.Context.User.Identity.Name);
+				if (user != null)
+				{
+					IList<string> roles = await _userManager.GetRolesAsync(user);
+					return Ok(new AuthorizationInfo 
+					{ 
+						UserId = user.Id, 
+						Email = user.Email,
+						Roles = roles 
+					});
+				}
+				return NotFound("User with name: " + _signInManager.Context.User.Identity.Name + " not found");
+			}
+			return Unauthorized("Can not get user identity from token.");
         }
 		/*
 		[HttpPost("Logout")]

@@ -1,8 +1,7 @@
-﻿using Benteler.WorkPlan.Api.SharedModels.Authentication;
+﻿using Benteler.WorkPlan.Api.Models.Auth;
 using Benteler.WorkPlan.Api.SharedModels.Authentication.Dto;
 using Benteler.WorkPlan.Api.SharedModels.Authentication.Result;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 

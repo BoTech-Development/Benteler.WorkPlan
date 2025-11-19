@@ -3,6 +3,5 @@
   <Project Path="Benteler.WorkPlan.Api/Benteler.WorkPlan.Api.csproj" />
   <Project Path="Benteler.WorkPlan.AppHost/Benteler.WorkPlan.AppHost.csproj" />
   <Project Path="Benteler.WorkPlan.ServiceDefaults/Benteler.WorkPlan.ServiceDefaults.csproj" />
-  <Project Path="Benteler.WorkPlan.Web/Benteler.WorkPlan.Web.Client/Benteler.WorkPlan.Web.Client.csproj" Id="fc3df512-fcaa-47e2-9338-1911294f6834" />
-  <Project Path="Benteler.WorkPlan.Web/Benteler.WorkPlan.Web/Benteler.WorkPlan.Web.csproj" Id="b876e12c-d451-41ce-af34-ac71976b9e6e" />
+  <Project Path="Benteler.WorkPlan.Web/Benteler.WorkPlan.Web.csproj" Id="16e2bd49-7a7f-402c-bb58-88686f91c3da" />
 </Solution>

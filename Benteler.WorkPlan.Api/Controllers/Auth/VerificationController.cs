@@ -1,5 +1,5 @@
 ﻿using Benteler.WorkPlan.Api.Data;
-using Benteler.WorkPlan.Api.SharedModels.Authentication;
+using Benteler.WorkPlan.Api.Models.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Benteler.WorkPlan.Api.Controllers.Auth
