@@ -1,0 +1,223 @@
+﻿<MudDialog @bind-Visible="IsErrorDialogOpen" Style="height: 400px">
+	<TitleContent>
+		<MudStack Row="true" AlignItems="AlignItems.Center">
+			<MudIcon Icon="@Icon" Class="mr-3" Color="@IconColor" Size="Size.Large" />
+            <MudText Typo="Typo.h6">@Title</MudText>
+        </MudStack>
+	</TitleContent>
+	<DialogContent>
+		@Message
+	</DialogContent>
+	<DialogActions>
+		@foreach (MudButtonConfig buttonConfig in ActionButtons)
+		{
+			<MudButton Variant="@buttonConfig.Variant"
+			           Color="@buttonConfig.Color"
+			           StartIcon="@buttonConfig.StartIcon"
+			           OnClick="@buttonConfig.OnClick">
+				@buttonConfig.Text
+			</MudButton>
+        }
+		<!--<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CloseErrorDialog" Class="px-10">Close</MudButton>-->
+	</DialogActions>
+</MudDialog>
+
+@code
+{
+	private DialogType _dialogViewType = DialogType.Success;
+	[Parameter]
+	public DialogType DialogViewType 
+	{ 
+		get => _dialogViewType; 
+		set
+		{
+			_dialogViewType = value;
+			UpdateDialogProperties();
+		}
+	}
+	private DialogActions _dialogViewActions = DialogActions.Ok;
+	[Parameter]
+	public DialogActions DialogViewActions 
+	{ 
+		get => _dialogViewActions;
+		set
+		{
+            _dialogViewActions = value;
+            UpdateDialogProperties();
+		}
+	} 
+	/// <summary>
+	/// The color of the icon displayed in the dialog top bar.
+	/// </summary>
+	[Parameter]
+	public Color IconColor { get; set; } = Color.Error;
+	/// <summary>
+	/// The title which will be displayed next to the icon a the top bar.
+	/// </summary>
+	[Parameter]
+	public string Title { get; set; } = "";
+	/// <summary>
+	/// The Icon which will be displayed in the dialog.
+	/// </summary>
+	[Parameter]
+	public string Icon { get; set; } = Icons.Material.Filled.Error;
+	/// <summary>
+	/// The ErrorMessage which will be displayed in the dialog.
+	/// </summary>
+	[Parameter]
+	public string Message { get; set; } = string.Empty;
+	/// <summary>
+	/// Is true when the error dialog is open/visible.
+	/// </summary>
+	[Parameter]
+	public bool IsErrorDialogOpen { get; set; }
+	/// <summary>
+	///	Action buttons to be displayed in the dialog.
+	/// </summary>
+	[Parameter]
+	public List<MudButtonConfig> ActionButtons { get; set; } = new List<MudButtonConfig>();
+	[Parameter]
+	public Action<MessageBoxDialog, DialogActionType>? OnStandardDialogButtonClicked { get; set; }
+
+	private void UpdateDialogProperties()
+	{
+		ApplyDialogTypeConfig();
+		AddDialogActionsFromDialogConfig();
+		StateHasChanged();
+	}
+
+	private void AddDialogActionsFromDialogConfig()
+	{
+		switch (DialogViewActions)
+		{
+			case DialogActions.Ok:
+                ActionButtons.Clear();
+				AddOkActionButton();
+				break;
+			case DialogActions.No:
+				ActionButtons.Clear();
+				AddNoActionButton();
+				break;
+			case DialogActions.Yes:
+				ActionButtons.Clear();
+				AddYesActionButton();
+				break;
+			case DialogActions.Cancel:
+				ActionButtons.Clear();
+				AddCancelActionButton();
+				break;
+			case DialogActions.OkCancel:
+				ActionButtons.Clear();
+				AddOkActionButton();
+				AddCancelActionButton();
+				break;
+			case DialogActions.YesNo:
+				ActionButtons.Clear();
+				AddYesActionButton();
+				AddNoActionButton();
+				break;
+			case DialogActions.YesNoCancel:
+				ActionButtons.Clear();
+				AddYesActionButton();
+				AddNoActionButton();
+				AddCancelActionButton();
+				break;
+		}
+	}
+	private void AddOkActionButton()
+	{
+		ActionButtons.Add(new MudButtonConfig("Ok", Variant.Filled, Icons.Material.Filled.Check, Color.Success, () =>
+		{
+			OnStandardActionButtonClicked(DialogActionType.Ok);
+		}));
+	}
+	private void AddYesActionButton()
+	{
+		ActionButtons.Add(new MudButtonConfig("Yes", Variant.Filled, Icons.Material.Filled.ThumbUp, Color.Success, () =>
+		{
+			OnStandardActionButtonClicked(DialogActionType.Yes);
+		}));
+	}
+	private void AddNoActionButton()
+	{
+		ActionButtons.Add(new MudButtonConfig("No", Variant.Filled, Icons.Material.Filled.ThumbDown, Color.Warning, () =>
+		{
+			OnStandardActionButtonClicked(DialogActionType.No);
+		}));
+	}
+	private void AddCancelActionButton()
+	{
+		ActionButtons.Add(new MudButtonConfig("Cancel", Variant.Filled, Icons.Material.TwoTone.Cancel, Color.Error, () =>
+		{
+			OnStandardActionButtonClicked(DialogActionType.Cancel);
+		}));
+	}
+	private void OnStandardActionButtonClicked(DialogActionType dialogActionType)
+	{
+		if (OnStandardDialogButtonClicked != null) OnStandardDialogButtonClicked.Invoke(this, dialogActionType);
+		if(dialogActionType == DialogActionType.No || dialogActionType == DialogActionType.Cancel)
+		{
+			IsErrorDialogOpen = false;
+        }
+	}
+
+
+
+	private void ApplyDialogTypeConfig()
+	{
+		switch (DialogViewType)
+		{
+			case DialogType.Error:
+				IconColor = Color.Error;
+				Icon = Icons.Material.Filled.Error;
+				break;
+			case DialogType.Info:
+				IconColor = Color.Info;
+				Icon = Icons.Material.Filled.Info;
+				break;
+			case DialogType.Success:
+				IconColor = Color.Success;
+				Icon = Icons.Material.Filled.Check;
+				break;
+			case DialogType.Warning:
+				IconColor = Color.Warning;
+				Icon = Icons.Material.Filled.Warning;
+				break;
+		}
+	}
+
+	public class MudButtonConfig(string text, Variant variant, string startIcon, Color color, Action onClick)
+	{
+		public Variant Variant { get; set; } = variant;
+		public Color Color { get; set; } = color;
+		public string StartIcon { get; set; } = startIcon;
+		public Action OnClick { get; set; } = onClick;
+		public string Text { get; set; } = text;
+	}
+	//private void CloseErrorDialog() { IsErrorDialogOpen = false; }
+	public enum DialogType
+	{
+		Info,
+		Warning,
+		Error,
+		Success
+    }
+	public enum DialogActions
+	{
+		OkCancel,
+		YesNoCancel,
+		YesNo,
+		Ok,
+		Cancel,
+		Yes,
+		No
+    }
+
+	public enum DialogActionType
+	{
+		Ok,
+		Cancel,
+		Yes,
+		No
+	}
+}

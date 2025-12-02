@@ -24,37 +24,39 @@ else
 		<MudItem>
 			<MudPaper Class="pa-4">
 				<MudTextField T="string"
-				Label="Email"
-				Variant="Variant.Outlined"
-				Required="true"
-				FullWidth="true" 
-				@bind-Value="Email"/>
+							  Label="Email"
+							  Variant="Variant.Outlined"
+							  Required="true"
+							  FullWidth="true" 
+							  @bind-Value="Email"/>
+				<MudLink OnClick="OnForgetPasswordClicked">
+					Forget Password?
+				</MudLink>
 				<MudTextField T="string"
-				Label="Password"
-				Variant="Variant.Outlined"
-				Required="true"
-				FullWidth="true"
-				@bind-Value="Password"/>
+							  Label="Password"
+							  Variant="Variant.Outlined"
+							  Required="true"
+							  FullWidth="true"
+							  @bind-Value="Password"/>
 				<MudText Typo="Typo.caption" 
-				Class="mt-2"
-				hidden="@isTowFactorCodeBoxVisisble">
+						 Class="mt-2"
+						 hidden="@isTowFactorCodeBoxVisisble">
 					Please check your Authenticator app.
 				</MudText>
 				<MudTextField T="string"
-				Label="Code"
-				Variant="Variant.Outlined"
-				Required="true"
-				FullWidth="true"
-				hidden="@isTowFactorCodeBoxVisisble"
-				@bind-Value="Code" />
+							  Label="Code"
+							  Variant="Variant.Outlined"
+							  Required="true"
+							  FullWidth="true"
+							  hidden="@isTowFactorCodeBoxVisisble"
+							  @bind-Value="Code" />
 			</MudPaper>
 		</MudItem>
 		<MudItem>
 			<MudStack Row="true">
 				<MudButton Variant="Variant.Outlined"
-				Color="Color.Secondary"
-				FullWidth="true"
-				>
+						   Color="Color.Secondary"
+						   FullWidth="true">
 					Cancel
 				</MudButton>
 				<LoadingButton FullWidth="true"
@@ -89,7 +91,14 @@ else
 	{
 		TryToValidateOldToken();
 	}
-
+	private void OnForgetPasswordClicked()
+	{
+		NavigationManager.NavigateTo("/auth/forget-password", true);
+    }
+	private void OnCancelClicked()
+	{
+		NavigationManager.NavigateTo((LastPage == null) ? "/" : LastPage, true);
+    }
 	private async Task TryToValidateOldToken()
 	{
 		ApiClient? client = null;

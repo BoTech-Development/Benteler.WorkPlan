@@ -1,0 +1,30 @@
+﻿@page "/MessageBoxSample"
+@using static Benteler.WorkPlan.Web.Components.MessageBoxDialog
+<h3>MessageBoxSample</h3>
+<MessageBoxDialog IsErrorDialogOpen="@_isMessageBoxOpen"
+				  DialogViewType="DialogType.Warning"
+				  DialogViewActions="DialogActions.YesNoCancel"
+				  Title="Sample Message Box"
+				  Message="This is a sample message box."
+                  OnStandardDialogButtonClicked="OnMessageBoxButtonClicked" />
+<MudButton Variant="Variant.Filled"
+		   Color="Color.Primary"
+		   FullWidth="true"
+		   OnClick="@ShowMessageBox">
+	Test
+</MudButton>
+<MudText>@_youClicked</MudText>
+@code {
+    private string _youClicked = "No button clicked yet.";
+    private bool _isMessageBoxOpen = false;
+	private void ShowMessageBox()
+	{
+        _isMessageBoxOpen = true;
+	}
+	private void OnMessageBoxButtonClicked(MessageBoxDialog dialog, DialogActionType actionType)
+	{
+        _youClicked = $"You clicked: {actionType}";
+		_isMessageBoxOpen = false;
+        this.StateHasChanged();
+    }
+}

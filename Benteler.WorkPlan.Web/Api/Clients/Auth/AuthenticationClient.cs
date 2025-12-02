@@ -42,6 +42,17 @@ namespace Benteler.WorkPlan.Web.Api.Clients.Auth
             return await _httpRequestHelper.LoadTokenCookies(cookieService);
         }
         /// <summary>
+        /// Sends a password reset email to the specified address.
+        /// </summary>
+        /// <param name="email">The email address of the user who will receive the password reset instructions. Cannot be null or empty.</param>
+        /// <exception cref="Exception">Thrown if the password reset email could not be sent.</exception>
+        public async Task ResetPassword(string email)
+        {
+            RequestResult<dynamic> result = await _httpRequestHelper.HttpPostJson($"/forgotpassword", new ResendConfirmationEmailModel(email));
+            if (!result.IsSuccess())
+                throw new Exception($"Could not send reset password email. \n {result.Error?.Message}");
+        }
+        /// <summary>
         /// Requests a new access token using the provided refresh token.
         /// </summary>
         /// <remarks>This method performs an asynchronous HTTP request to refresh the authentication
@@ -58,7 +69,7 @@ namespace Benteler.WorkPlan.Web.Api.Clients.Auth
                 refreshToken = token.RefreshToken
             });
             if (!result.IsSuccess() && result.ParsedData != null)
-                throw new Exception($"Could not refresh token. {result.Error?.Message}");
+                throw new Exception($"Could not refresh token. \n {result.Error?.Message}");
             return result.ParsedData;
         }
         /// <summary>
